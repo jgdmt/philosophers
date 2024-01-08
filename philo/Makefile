@@ -1,4 +1,6 @@
-SRCS		:=	main.c
+SRCS		:=	main.c \
+				init.c \
+				ft_atoi.c
 
 OBJS		:=	${SRCS:.c=.o}
 

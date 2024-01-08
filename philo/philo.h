@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:48 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/01/05 15:08:19 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/01/05 16:35:30 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,20 @@
 typedef struct s_philo
 {
 	int	num;
-	int	die;
-	int	eat;
-	int	sleep;
-	int	must_eat;
 }	t_philo;
 
 typedef struct s_data
 {
-	t_philo	*philo;
+	int	nb_philo;
+	int	time_die;
+	int	time_eat;
+	int	time_sleep;
+	int	must_eat;
 }	t_data;
+
+int			ft_init_data(t_data *data, char **argv, int argc);
+
+int			ft_atoi(const char *str);
+long int	ft_atoli(const char *str);
 
 #endif
