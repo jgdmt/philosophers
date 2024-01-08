@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:48 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/01/05 16:35:30 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/01/08 20:00:50 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/time.h>
+# include <pthread.h>
 
 typedef struct s_philo
 {
