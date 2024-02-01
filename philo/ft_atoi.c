@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:49:30 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/01/31 12:00:41 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/01 12:55:20 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,8 @@ long int	ft_atoli(const char *str)
 		num = (num * 10) + (str[i++] - 48);
 		if (i > 11)
 			return (-2);
-		if (str[i] < 48 || str[i] > 57)
-			return (-2);
 	}
-	if (num > 2147483647)
+	if (str[i] != 0 || num > 2147483647)
 		return (-2);
 	return (num);
 }

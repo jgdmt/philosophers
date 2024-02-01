@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:15:34 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/01/31 15:41:42 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/01 15:17:26 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,22 +35,48 @@ static int	ft_check_arg(t_data *data)
 	return (1);
 }
 
-void	ft_init_philo(t_data *data)
+int	ft_init_philo(t_philo *philo, t_data *data)
 {
 	int	i;
 
 	i = 0;
-	while (i <= data->nb_philo)
+	while (i < data->nb_philo)
 	{
-		data->philo[i].nb = i + 1;
+		philo[i].nb = i + 1;
 		if (i == data->nb_philo)
-			data->philo[i].nb = 0;
-		data->philo[i].last_meal = 0;
-		data->philo[i].nb_meal = 0;
-		data->philo[i].thread = 0;
-		// pthread_create(&data->philo[i].thread, NULL, routine, data);
+			philo[i].nb = 0;
+		philo[i].last_meal = 0;
+		philo[i].nb_meal = 0;
+		philo[i].data = data;
+		philo[i].lf = &data->forks[i];
+		philo[i].rf = 0;
 		i++;
 	}
+	return (1);
+}
+
+int	ft_init_mutex(t_data *data)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->nb_philo)
+		if (pthread_mutex_init(&data->forks[i++], NULL) != 0)
+			return (0);
+	// if (pthread_mutex_init(&data->write_lock, NULL) != 0)
+	// 	return (0);
+	// if (pthread_mutex_init(&data->meal_lock, NULL) != 0)
+	// {
+	// 	pthread_mutex_destroy(&data->write_lock);
+	// 	return (0);
+	// }
+	// if (pthread_mutex_init(&data->death_lock, NULL) != 0)
+	// {
+	// 	pthread_mutex_destroy(&data->write_lock);
+	// 	pthread_mutex_destroy(&data->meal_lock);
+	// 	return (0);
+	// }
+	return (1);
 }
 
 int	ft_init_data(t_data *data, char **argv, int argc)
@@ -63,29 +89,12 @@ int	ft_init_data(t_data *data, char **argv, int argc)
 	data->must_eat = -1;
 	if (argc == 6)
 		data->must_eat = ft_atoli(argv[5]);
+	data->forks = malloc((data->nb_philo) * sizeof(pthread_mutex_t));
+	if (!data->forks)
+		return (0);
 	if (!ft_check_arg(data))
 		return (0);
-	data->philo = malloc((data->nb_philo + 1) * sizeof(t_philo));
-	if (!data->philo)
+	if (!ft_init_mutex(data))
 		return (0);
-	ft_init_philo(data);
-	return (1);
-}
-
-int	ft_init_mutex(t_data *data)
-{
-	if (pthread_mutex_init(&data->write_lock, NULL) != 0)
-		return (0);
-	if (pthread_mutex_init(&data->meal_lock, NULL) != 0)
-	{
-		pthread_mutex_destroy(&data->write_lock);
-		return (0);
-	}
-	if (pthread_mutex_init(&data->death_lock, NULL) != 0)
-	{
-		pthread_mutex_destroy(&data->write_lock);
-		pthread_mutex_destroy(&data->meal_lock);
-		return (0);
-	}
 	return (1);
 }

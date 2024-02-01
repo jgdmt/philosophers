@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:54 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/01/31 13:36:54 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/01 15:57:17 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,50 +21,78 @@ void	ft_putstr(int out, char *str)
 		write(out, &str[i++], 1);
 }
 
-// void	ft_write_message(t_philo philo, char *str)
-// {
-// 	printf("%d %d %s\n", time, philo.nb, str);
-// }
-
-void	*thread_1(void *arg)
+void	ft_write_message(t_philo *philo, char *str)
 {
-	(void) arg;
-	printf("Philo is eating\n");
-	pthread_exit(EXIT_SUCCESS);
+	// if (!philo->data->dead)
+	printf("%lu %d %s\n", get_time() % philo->data->start, philo->nb, str);
 }
 
-int	ft_start(t_data *data)
+void	ft_eat(t_philo *philo)
 {
-	while (!data->dead)
+	pthread_mutex_lock(philo->lf);
+	ft_write_message(philo, FORK);
+	pthread_mutex_lock(philo->rf);
+	ft_write_message(philo, FORK);
+	ft_write_message(philo, EAT);
+	philo->last_meal = get_time();
+	ft_usleep(philo->data->time_eat);
+	pthread_mutex_unlock(philo->lf);
+	pthread_mutex_unlock(philo->rf);
+}
+
+void	ft_think_sleep(t_philo *philo)
+{
+	ft_write_message(philo, THINK);
+	ft_write_message(philo, SLEEP);
+	ft_usleep(philo->data->time_sleep);
+}
+
+void	*ft_routine(void *arg)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *) arg;
+	if (philo->nb % 2)
+		ft_usleep(philo->data->time_eat * 0.9 + 1);
+	while (!philo->data->dead)
 	{
-		return (0);
+		ft_eat(philo);
+		ft_think_sleep(philo);
+		pthread_exit(NULL);
 	}
 	return (0);
 }
 
 int	main(int argc, char *argv[])
 {
-	// pthread_t thread1;
-
-	// printf("Before\n");
-	// pthread_create(&thread1, NULL, thread_1, NULL);
-	// pthread_join(thread1, NULL);
-	// printf("After\n");
-
 	t_data	data;
+	t_philo	*philo;
 
 	if (argc == 5 || argc == 6)
 	{
-			if (!ft_init_data(&data, argv, argc))
-			{
-				ft_putstr(2, "Error\nInvalid argument.\n");
-				return (1);
-			}
-		printf("%d, %d, %d, %d, %d\n", data.nb_philo, data.time_die, data.time_eat, data.time_sleep, data.must_eat);
-		int i=0;
-		while (data.philo[i].nb > 0)
-			printf("ID %d\n", data.philo[i++].nb);
-		// ft_start(&data);
+		if (!ft_init_data(&data, argv, argc))
+		{
+			ft_putstr(2, "Error\nInvalid argument.\n");
+			return (1);
+		}
+		philo = malloc((data.nb_philo) * sizeof(t_philo));
+		if (!philo)
+			return (1);
+		ft_init_philo(philo, &data);
+		data.start = get_time();
+		int i = 0;
+		while (i < data.nb_philo)
+		{
+			philo[i].rf = philo[(i + 1) % data.nb_philo].lf;
+			pthread_create(&philo[i].thread, NULL, ft_routine, &philo[i]);
+			i++;
+		}
+		i = 0;
+		while (i < data.nb_philo)
+		{
+			pthread_join(philo[i].thread, NULL);
+			i++;
+		}
 	}
 	else
 		ft_putstr(2, "Error\nWrong number of arguments.\n");
