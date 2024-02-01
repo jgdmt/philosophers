@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:54 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/01 15:57:17 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/01 20:16:44 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,76 +21,116 @@ void	ft_putstr(int out, char *str)
 		write(out, &str[i++], 1);
 }
 
-void	ft_write_message(t_philo *philo, char *str)
+void	ft_write_message(t_philo *ph, char *str)
 {
-	// if (!philo->data->dead)
-	printf("%lu %d %s\n", get_time() % philo->data->start, philo->nb, str);
+	pthread_mutex_lock(&ph[0].dt->write);
+	if (!ph[0].dt->dead)
+	printf("%lu %d %s\n", get_time() % ph->dt->start, ph->nb, str);
+	pthread_mutex_unlock(&ph[0].dt->write);
 }
 
-void	ft_eat(t_philo *philo)
+void	ft_eat(t_philo *ph)
 {
-	pthread_mutex_lock(philo->lf);
-	ft_write_message(philo, FORK);
-	pthread_mutex_lock(philo->rf);
-	ft_write_message(philo, FORK);
-	ft_write_message(philo, EAT);
-	philo->last_meal = get_time();
-	ft_usleep(philo->data->time_eat);
-	pthread_mutex_unlock(philo->lf);
-	pthread_mutex_unlock(philo->rf);
+	pthread_mutex_lock(ph->lf);
+	ft_write_message(ph, FORK);
+	pthread_mutex_lock(ph->rf);
+	ft_write_message(ph, FORK);
+	ft_write_message(ph, EAT);
+	ph->last_meal = get_time();
+	ph->nb_meal++;
+	ft_usleep(ph->dt->time_eat);
+	pthread_mutex_unlock(ph->lf);
+	pthread_mutex_unlock(ph->rf);
 }
 
-void	ft_think_sleep(t_philo *philo)
+void	ft_think_sleep(t_philo *ph)
 {
-	ft_write_message(philo, THINK);
-	ft_write_message(philo, SLEEP);
-	ft_usleep(philo->data->time_sleep);
+	ft_write_message(ph, SLEEP);
+	ft_usleep(ph->dt->time_sleep);
+	ft_write_message(ph, THINK);
 }
 
 void	*ft_routine(void *arg)
 {
-	t_philo	*philo;
+	t_philo	*ph;
 
-	philo = (t_philo *) arg;
-	if (philo->nb % 2)
-		ft_usleep(philo->data->time_eat * 0.9 + 1);
-	while (!philo->data->dead)
+	ph = (t_philo *) arg;
+	while (!ph->dt->done)
+		continue ;
+	if (ph->nb % 2)
+		ft_usleep(ph->dt->time_eat * 0.5);
+	while (!ph->dt->dead)
 	{
-		ft_eat(philo);
-		ft_think_sleep(philo);
-		pthread_exit(NULL);
+		ft_eat(ph);
+		ft_think_sleep(ph);
 	}
 	return (0);
 }
 
+void	*ft_monitor(void *arg)
+{
+	t_philo	*ph;
+	t_data	*dt;
+	int		tmp;
+	int		i;
+
+	ph = (t_philo *) arg;
+	dt = ph[0].dt;
+	while (!dt->dead)
+	{
+		i = 0;
+		tmp = 0;
+		if (dt->must_eat > -1)
+			tmp = 2;
+		while (i < dt->nb_philo)
+		{
+			if (get_time() - ph[i].last_meal > (size_t) dt->time_die)// && !ph[i].eating)
+			{
+				tmp = 1;
+				ft_write_message(&ph[i], DIE);
+				break ;
+			}
+			if (dt->must_eat > -1 && ph[i].nb_meal < dt->must_eat)
+				tmp = 0;
+			i++;
+		}
+		dt->dead = tmp;
+	}
+	return (NULL);
+}
+
 int	main(int argc, char *argv[])
 {
-	t_data	data;
-	t_philo	*philo;
+	t_data		dt;
+	t_philo		*ph;
+	pthread_t	handler;
 
 	if (argc == 5 || argc == 6)
 	{
-		if (!ft_init_data(&data, argv, argc))
+		if (!ft_init_data(&dt, argv, argc))
 		{
 			ft_putstr(2, "Error\nInvalid argument.\n");
 			return (1);
 		}
-		philo = malloc((data.nb_philo) * sizeof(t_philo));
-		if (!philo)
+		ph = malloc((dt.nb_philo) * sizeof(t_philo));
+		if (!ph)
 			return (1);
-		ft_init_philo(philo, &data);
-		data.start = get_time();
+		ft_init_philo(ph, &dt);
+		dt.start = get_time();
 		int i = 0;
-		while (i < data.nb_philo)
+		while (i < dt.nb_philo)
 		{
-			philo[i].rf = philo[(i + 1) % data.nb_philo].lf;
-			pthread_create(&philo[i].thread, NULL, ft_routine, &philo[i]);
+			ph[i].rf = ph[(i + 1) % dt.nb_philo].lf;
+			ph[i].last_meal = dt.start;
+			pthread_create(&ph[i].thread, NULL, ft_routine, &ph[i]);
 			i++;
 		}
+		pthread_create(&handler, NULL, ft_monitor, ph);
+		dt.done = 1;
 		i = 0;
-		while (i < data.nb_philo)
+		while (i < dt.nb_philo)
 		{
-			pthread_join(philo[i].thread, NULL);
+			pthread_join(ph[i].thread, NULL);
 			i++;
 		}
 	}
