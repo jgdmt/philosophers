@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:54 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/01 20:16:44 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/02 15:16:42 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void	ft_write_message(t_philo *ph, char *str)
 {
 	pthread_mutex_lock(&ph[0].dt->write);
 	if (!ph[0].dt->dead)
-	printf("%lu %d %s\n", get_time() % ph->dt->start, ph->nb, str);
+		printf("%lu %d %s\n", get_time() % ph->dt->start, ph->nb, str);
 	pthread_mutex_unlock(&ph[0].dt->write);
 }
 
@@ -35,9 +35,9 @@ void	ft_eat(t_philo *ph)
 	ft_write_message(ph, FORK);
 	pthread_mutex_lock(ph->rf);
 	ft_write_message(ph, FORK);
-	ft_write_message(ph, EAT);
 	ph->last_meal = get_time();
 	ph->nb_meal++;
+	ft_write_message(ph, EAT);
 	ft_usleep(ph->dt->time_eat);
 	pthread_mutex_unlock(ph->lf);
 	pthread_mutex_unlock(ph->rf);
@@ -88,14 +88,21 @@ void	*ft_monitor(void *arg)
 			{
 				tmp = 1;
 				ft_write_message(&ph[i], DIE);
+				dt->dead = tmp;
+				pthread_mutex_unlock(ph[i].rf);
+				pthread_mutex_unlock(ph[i].lf);
 				break ;
 			}
-			if (dt->must_eat > -1 && ph[i].nb_meal < dt->must_eat)
+			else if (dt->must_eat > -1 && ph[i].nb_meal < dt->must_eat)
 				tmp = 0;
 			i++;
 		}
 		dt->dead = tmp;
 	}
+	i = 0;
+	while (i < dt->nb_philo)
+		pthread_mutex_destroy(&dt->forks[i++]);
+	free(dt->forks);
 	return (NULL);
 }
 
