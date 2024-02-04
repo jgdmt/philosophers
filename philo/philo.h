@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:48 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/01 20:15:50 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/04 16:09:45 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,12 @@ typedef struct s_philo
 int			ft_init_data(t_data *dt, char **argv, int argc);
 int			ft_init_philo(t_philo *philo, t_data *dt);
 
+void		*ft_monitor(void *arg);
+void		*ft_routine(void *arg);
+
 long int	ft_atoli(const char *str);
 void		ft_putstr(int out, char *str);
-
+void		ft_write_message(t_philo *ph, char *str);
 size_t		get_time(void);
 void		ft_usleep(size_t msec);
 

@@ -6,19 +6,11 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:15:34 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/01 20:15:14 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/04 16:10:19 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-// void	ft_clean(t_data *data)
-// {
-// 	int	i;
-
-// 	i = 0;
-
-// }
 
 static int	ft_check_arg(t_data *dt)
 {

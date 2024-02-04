@@ -1,7 +1,8 @@
 SRCS		:=	main.c \
 				init.c \
-				ft_atoi.c \
-				utils.c
+				utils.c \
+				monitor.c \
+				routine.c
 
 OBJS		:=	${SRCS:.c=.o}
 
