@@ -2,12 +2,13 @@ SRCS		:=	main.c \
 				init.c \
 				utils.c \
 				monitor.c \
-				routine.c
+				routine.c \
+				destroy.c 
 
 OBJS		:=	${SRCS:.c=.o}
 
 CC			:= gcc
-CFLAGS		:= -Werror -Wextra -Wall -I. #-fsanitize=address
+CFLAGS		:= -Werror -Wextra -Wall -I.
 RM			:= rm -f
 
 NAME		:= philo

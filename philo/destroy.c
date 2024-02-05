@@ -1,33 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_atoi.c                                          :+:      :+:    :+:   */
+/*   destroy.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/05 15:49:30 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/01 12:55:20 by jgoudema         ###   ########.fr       */
+/*   Created: 2024/02/05 09:11:44 by jgoudema          #+#    #+#             */
+/*   Updated: 2024/02/05 19:01:35 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long int	ft_atoli(const char *str)
+void	destroy(t_data *dt)
 {
-	long int	num;
-	int			i;
+	int	i;
 
-	num = 0;
 	i = 0;
-	if (str[i] == '-')
-		return (-2);
-	while (str[i] >= '0' && str[i] <= '9')
+	while (i < dt->nb_philo)
 	{
-		num = (num * 10) + (str[i++] - 48);
-		if (i > 11)
-			return (-2);
+		pthread_mutex_destroy(&dt->forks[i]);
+		i++;
 	}
-	if (str[i] != 0 || num > 2147483647)
-		return (-2);
-	return (num);
+	pthread_mutex_destroy(&dt->write);
+	pthread_mutex_destroy(&dt->death);
+	pthread_mutex_destroy(&dt->meal);
+	free(dt->forks);
 }

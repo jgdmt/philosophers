@@ -6,13 +6,13 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:54 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/04 16:09:30 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/05 19:01:50 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	ft_start_thread(t_philo *ph)
+int	ft_start_thread(t_philo *ph)
 {
 	int		i;
 	size_t	start;
@@ -23,19 +23,25 @@ void	ft_start_thread(t_philo *ph)
 	while (++i < num)
 	{
 		ph[i].rf = ph[(i + 1) % num].lf;
-		pthread_create(&ph[i].thread, NULL, ft_routine, &ph[i]);
+		if (pthread_create(&ph[i].thread, NULL, ft_routine, &ph[i]))
+		{
+			destroy(ph[0].dt);
+			free(ph);
+			return (1);
+		}
 	}
 	i = -1;
 	start = get_time();
 	ph[0].dt->start = start;
 	while (++i < num)
-	{
 		ph[i].last_meal = start;
-	}
+	pthread_mutex_lock(&ph[0].dt->write);
 	ph[0].dt->done = 1;
+	pthread_mutex_unlock(&ph[0].dt->write);
+	return (0);
 }
 
-void	ft_join_thread(t_philo *ph)
+int	ft_join_thread(t_philo *ph)
 {
 	int		i;
 	int		num;
@@ -45,13 +51,23 @@ void	ft_join_thread(t_philo *ph)
 	i = -1;
 	dt = ph[0].dt;
 	while (++i < num)
-		pthread_join(ph[i].thread, NULL);
+	{
+		if (pthread_join(ph[i].thread, NULL))
+		{
+			destroy(dt);
+			free(ph);
+			return (1);
+		}
+	}
 	i = -1;
 	while (++i < num)
 		pthread_mutex_destroy(&dt->forks[i]);
 	free(dt->forks);
+	pthread_mutex_destroy(&dt->death);
+	pthread_mutex_destroy(&dt->meal);
 	pthread_mutex_destroy(&dt->write);
 	free(ph);
+	return (0);
 }
 
 int	main(int argc, char *argv[])
@@ -69,11 +85,13 @@ int	main(int argc, char *argv[])
 		}
 		ph = malloc((dt.nb_philo) * sizeof(t_philo));
 		if (!ph)
-			return (1);
+			return (destroy(&dt), 1);
 		ft_init_philo(ph, &dt);
-		ft_start_thread(ph);
+		if (ft_start_thread(ph))
+			return (1);
 		pthread_create(&handler, NULL, ft_monitor, ph);
-		ft_join_thread(ph);
+		if (ft_join_thread(ph))
+			return (1);
 		pthread_join(handler, NULL);
 	}
 	else

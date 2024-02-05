@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/31 11:39:04 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/04 16:07:47 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/05 19:02:22 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,8 @@ void	ft_putstr(int out, char *str)
 
 void	ft_write_message(t_philo *ph, char *str)
 {
-	pthread_mutex_lock(&ph[0].dt->write);
+	pthread_mutex_lock(&ph[0].dt->death);
 	if (!ph[0].dt->dead)
 		printf("%lu %d %s\n", get_time() - ph[0].dt->start, ph->nb, str);
-	pthread_mutex_unlock(&ph[0].dt->write);
+	pthread_mutex_unlock(&ph[0].dt->death);
 }

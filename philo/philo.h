@@ -6,7 +6,7 @@
 /*   By: jgoudema <jgoudema@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 15:07:48 by jgoudema          #+#    #+#             */
-/*   Updated: 2024/02/04 16:09:45 by jgoudema         ###   ########.fr       */
+/*   Updated: 2024/02/05 19:02:09 by jgoudema         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,14 @@ typedef struct s_data
 	size_t			start;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	write;
+	pthread_mutex_t	death;
+	pthread_mutex_t	meal;
 }	t_data;
 
 typedef struct s_philo
 {
 	pthread_t		thread;
 	int				nb;
-	int				eating;
 	size_t			last_meal;
 	int				nb_meal;
 	pthread_mutex_t	*rf;
@@ -52,10 +53,12 @@ typedef struct s_philo
 }	t_philo;
 
 int			ft_init_data(t_data *dt, char **argv, int argc);
-int			ft_init_philo(t_philo *philo, t_data *dt);
+void		ft_init_philo(t_philo *philo, t_data *dt);
+void		destroy(t_data *dt);
 
 void		*ft_monitor(void *arg);
 void		*ft_routine(void *arg);
+int			ft_is_dead(t_data *dt);
 
 long int	ft_atoli(const char *str);
 void		ft_putstr(int out, char *str);
